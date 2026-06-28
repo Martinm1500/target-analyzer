@@ -70,3 +70,18 @@
 [2026-06-28 15:49:19] [INFO] [ROBOT] Enviando objetivo al robot
 [2026-06-28 15:49:20] [SUCCESS] [ROBOT] Escaneo completado exitosamente
 [2026-06-28 15:49:20] [INFO] [RETORNO] Despachando JSON estructurado hacia el Frontend
+[2026-06-28 15:52:00] [INFO] [SISTEMA] Servidor inicializado correctamente
+[2026-06-28 15:52:00] [INFO] [SISTEMA] Escuchando en puerto 3000
+[2026-06-28 15:53:19] [INFO] [SISTEMA] Servidor inicializado correctamente
+[2026-06-28 15:53:19] [INFO] [SISTEMA] Escuchando en puerto 4000
+[2026-06-28 15:53:30] [INFO] [PROCESO] Objetivo recibido: https://www.youtube.com/
+[2026-06-28 15:53:30] [INFO] [ROBOT] Enviando objetivo al robot
+[2026-06-28 15:53:35] [SUCCESS] [ROBOT] Escaneo completado exitosamente
+[2026-06-28 15:53:35] [INFO] [RETORNO] Despachando JSON estructurado hacia el Frontend
+[2026-06-28 20:30:53] [INFO] [SISTEMA] Servidor inicializado correctamente
+[2026-06-28 20:30:53] [INFO] [SISTEMA] Escuchando en puerto 3000
+[2026-06-28 20:31:04] [INFO] [PROCESO] Objetivo recibido: https://www.youtube.com/
+[2026-06-28 20:31:04] [INFO] [ESCANEO] Inicio del análisis
+[2026-06-28 20:31:04] [INFO] [ROBOT] Enviando objetivo al robot
+[2026-06-28 20:31:10] [SUCCESS] [ROBOT] Escaneo completado exitosamente
+[2026-06-28 20:31:10] [INFO] [RETORNO] Despachando JSON estructurado hacia el Frontend

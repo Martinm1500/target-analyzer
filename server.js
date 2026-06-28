@@ -68,6 +68,8 @@ app.post("/api/escanear", async (req, res) => {
   }
 
   try {
+    registrarLog("INFO", "ESCANEO", "Inicio del análisis");
+
     registrarLog("INFO", "ROBOT", "Enviando objetivo al robot");
 
     // Llamada asincrónica real al Robot
@@ -94,8 +96,6 @@ app.post("/api/escanear", async (req, res) => {
       "Despachando JSON estructurado hacia el Frontend",
     );
 
-    // ✨ RESPUESTA TOTALMENTE BLINDADA: Duplicamos las propiedades para que el front
-    // lea "metricas" o "metrics" sin importar qué idioma use, destrabando la pantalla.
     return res.status(200).json({
       estado: "EXITO",
       mensaje: "Sondas recuperadas. Analisis completado.",
@@ -103,15 +103,13 @@ app.post("/api/escanear", async (req, res) => {
       objetivo: urlRecibida,
       identidad: datosDelRobot.identidad,
       tecnologias: datosDelRobot.tecnologias,
-      metricas: datosDelRobot.metricas, // Para tu script.js en español
-      metrics: datosDelRobot.metricas, // Copia de seguridad en inglés
+      metricas: datosDelRobot.metricas,
       enlaces: datosDelRobot.enlaces || [],
     });
   } catch (error) {
     totalErrores++;
     registrarLog("ERROR", "SISTEMA", error.message);
 
-    // Si el robot falla, devolvemos la estructura armada para que el front no lea "undefined"
     return res.status(500).json({
       estado: "ERROR",
       mensaje: "Error interno durante el analisis.",
