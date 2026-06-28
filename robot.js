@@ -47,6 +47,21 @@ async function ejecutarExtraccion(urlObjetivo) {
         await navegador.close();
       } catch (e) {}
     }, 2000);
+
+    console.log(
+      "[DEBUG] Datos a retornar:",
+      JSON.stringify(
+        {
+          identidad: { titulo: tituloPagina, descripcion: descripcionPagina },
+          tecnologias: { servidor, lenguaje, frameworkFront },
+          metricas: { tiempoRespuestaMs, pesoDocumentoKb, certSslVigente },
+          enlacesCount: enlaces.length,
+        },
+        null,
+        2,
+      ),
+    );
+
     return {
       identidad: {
         titulo: tituloPagina,
