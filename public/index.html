@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CTU | Target Analyzer</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="bunker-container">
+      <header class="consola-input">
+        <span class="prompt-text">[TARGET_URL]:</span>
+        <input
+          type="text"
+          id="target-url"
+          placeholder="Ingrese dominio objetivo ..."
+          autocomplete="off"
+        />
+        <button id="btn-scan">[INICIAR_ESCANEO]</button>
+        <button id="btn-abortar">[ABORTAR]</button>
+      </header>
+      <main class="grid-paneles">
+        <section class="panel" id="panel-vista">
+          <h2 class="panel-titulo">PANEL 1: [VISTA]</h2>
+          <div class="contenido-panel">Esperando objetivo ...</div>
+        </section>
+        <section class="panel" id="panel-tech">
+          <h2 class="panel-titulo">PANEL 2: [TECNOLOGÍA]</h2>
+          <div class="contenido-panel">Esperando objetivo ...</div>
+        </section>
+        <section class="panel" id="panel-enlaces">
+          <h2 class="panel-titulo">PANEL 3: [MAPA_ENLACES]</h2>
+          <div class="contenido-panel scroll-activo">
+            Esperando objetivo ...
+          </div>
+        </section>
+        <section class="panel" id="panel-metricas">
+          <h2 class="panel-titulo">PANEL 4: [MÉTRICAS]</h2>
+          <div class="contenido-panel">Esperando objetivo ...</div>
+        </section>
+      </main>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>

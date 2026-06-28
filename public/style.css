@@ -1,0 +1,125 @@
+/* 1. VARIABLES GLOBALES (Estética CTU) */
+:root {
+  --fondo-absoluto: #050505;
+  --color-terminal: #00ff41; /* Verde fósforo / Neon */
+  --color-alerta: #ffb000; /* Ámbar táctico */
+  --borde-panel: 1px solid #00ff41;
+  --sombra-neon: 0 0 10px rgba(0, 255, 65, 0.2);
+}
+
+/* 2. LA LEY CONSTITUCIONAL Y RESETEO */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* 3. TIPOGRAFÍA Y FONDO */
+body {
+  background-color: var(--fondo-absoluto);
+  color: var(--color-terminal);
+  /* El secreto de la terminal: fuente monoespaciada */
+  font-family: "Courier New", Courier, monospace;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 4. CONTENEDOR MAESTRO */
+.bunker-container {
+  width: 95%;
+  max-width: 1200px;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* 5. CONSOLA DE ENTRADA */
+.consola-input {
+  display: flex;
+  gap: 15px;
+  padding: 20px;
+  border: var(--borde-panel);
+  box-shadow: var(--sombra-neon);
+  background-color: #0a0a0a;
+}
+
+.consola-input input {
+  flex-grow: 1; /* El input ocupa todo el espacio sobrante */
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--color-terminal);
+  color: var(--color-terminal);
+  font-family: inherit;
+  font-size: 1.2rem;
+  outline: none;
+}
+
+.consola-input button {
+  background-color: var(--color-terminal);
+  color: var(--fondo-absoluto);
+  border: none;
+  padding: 10px 20px;
+  font-weight: bold;
+  font-family: inherit;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.consola-input button:hover {
+  background-color: var(--color-alerta);
+  box-shadow: 0 0 15px var(--color-alerta);
+}
+
+/* 6. GRILLA TÁCTICA (CSS GRID) */
+.grid-paneles {
+  display: grid;
+  /* Definimos 2 columnas exactamente iguales */
+  grid-template-columns: 1fr 1fr;
+  /* Definimos 2 filas exactamente iguales que ocupen el resto del alto */
+  grid-template-rows: 1fr 1fr;
+  gap: 20px;
+  flex-grow: 1;
+}
+
+/* 7. DISEÑO DE CADA PANEL */
+.panel {
+  border: var(--borde-panel);
+  background-color: #0a0a0a;
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+  box-shadow: var(--sombra-neon);
+}
+
+.panel-titulo {
+  font-size: 1rem;
+  border-bottom: 1px dashed var(--color-terminal);
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+  color: var(--color-alerta);
+}
+
+/* 8. EL CONTROL DE DESBORDAMIENTO (OVERFLOW) */
+.contenido-panel {
+  flex-grow: 1;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.scroll-activo {
+  /* La orden que evita que el diseño explote */
+  overflow-y: auto;
+  max-height: 100%;
+}
+
+/* Detalles para embellecer la barra de scroll (opcional pero cool) */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-terminal);
+}
