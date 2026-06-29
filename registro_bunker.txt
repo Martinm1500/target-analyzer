@@ -1,0 +1,47 @@
+[2026-06-29 00:48:50] [INFO] [PROCESO] Objetivo recibido: https://unpilar.edu.ar/campus/my/
+[2026-06-29 00:48:50] [INFO] [ESCANEO] Inicio del análisis
+[2026-06-29 00:48:50] [INFO] [ROBOT] Enviando objetivo al robot
+[2026-06-29 00:48:56] [SUCCESS] [ROBOT] Escaneo completado exitosamente
+[2026-06-29 00:48:56] [INFO] [RETORNO] Despachando JSON estructurado hacia el Frontend
+[2026-06-29 16:34:30] [INFO] [SISTEMA] Servidor inicializado correctamente
+[2026-06-29 16:34:30] [INFO] [SISTEMA] Escuchando en puerto 3000
+[2026-06-29 16:38:50] [INFO] [PROCESO] Objetivo recibido: https://unpilar.edu.ar/campus/course/view.php?id=1157
+[2026-06-29 16:38:50] [INFO] [ESCANEO] Inicio del análisis
+[2026-06-29 16:38:50] [INFO] [ROBOT] Enviando objetivo al robot
+[2026-06-29 16:39:09] [SUCCESS] [ROBOT] Escaneo completado exitosamente
+[2026-06-29 16:39:09] [INFO] [RETORNO] Despachando JSON estructurado hacia el Frontend
+[2026-06-29 16:42:44] [INFO] [SISTEMA] Servidor inicializado correctamente
+[2026-06-29 16:42:44] [INFO] [SISTEMA] Escuchando en puerto 3000
+[2026-06-29 16:42:49] [INFO] [PROCESO] Objetivo recibido: https://unpilar.edu.ar/campus/course/view.php?id=1157
+[2026-06-29 16:42:49] [INFO] [ESCANEO] Inicio del análisis
+[2026-06-29 16:42:49] [INFO] [ROBOT] Enviando objetivo al robot
+[2026-06-29 16:42:52] [SUCCESS] [ROBOT] Escaneo completado exitosamente
+[2026-06-29 16:42:52] [INFO] [RETORNO] Despachando JSON estructurado hacia el Frontend
+[2026-06-29 16:44:00] [INFO] [PROCESO] Objetivo recibido: .
+[2026-06-29 16:44:00] [ERROR] [VALIDACION] URL invalida: .
+[2026-06-29 16:45:19] [INFO] [PROCESO] Objetivo recibido: 
+[2026-06-29 16:45:19] [ERROR] [VALIDACION] URL vacia
+[2026-06-29 16:57:56] [INFO] [PROCESO] Objetivo recibido: https://unpilar.edu.ar/campus/course/view.php?id=1157
+[2026-06-29 16:57:56] [INFO] [ESCANEO] Inicio del análisis
+[2026-06-29 16:57:56] [INFO] [ROBOT] Enviando objetivo al robot
+[2026-06-29 16:58:04] [SUCCESS] [ROBOT] Escaneo completado exitosamente
+[2026-06-29 16:58:04] [INFO] [RETORNO] Despachando JSON estructurado hacia el Frontend
+[2026-06-29 16:58:21] [INFO] [PROCESO] Objetivo recibido: https://unpilar.edu.ar/campus/course/view.php?id=1157
+[2026-06-29 16:58:21] [INFO] [ESCANEO] Inicio del análisis
+[2026-06-29 16:58:21] [INFO] [ROBOT] Enviando objetivo al robot
+[2026-06-29 16:58:24] [SUCCESS] [ROBOT] Escaneo completado exitosamente
+[2026-06-29 16:58:24] [INFO] [RETORNO] Despachando JSON estructurado hacia el Frontend
+[2026-06-29 17:00:01] [INFO] [SISTEMA] Servidor inicializado correctamente
+[2026-06-29 17:00:01] [INFO] [SISTEMA] Escuchando en puerto 3000
+[2026-06-29 17:00:07] [INFO] [PROCESO] Objetivo recibido: https://unpilar.edu.ar/campus/course/view.php?id=1157
+[2026-06-29 17:00:07] [INFO] [ESCANEO] Inicio del análisis
+[2026-06-29 17:00:07] [INFO] [ROBOT] Enviando objetivo al robot
+[2026-06-29 17:00:09] [SUCCESS] [ROBOT] Escaneo completado exitosamente
+[2026-06-29 17:00:09] [INFO] [RETORNO] Despachando JSON estructurado hacia el Frontend
+[2026-06-29 17:01:54] [INFO] [PROCESO] Objetivo recibido: 
+[2026-06-29 17:01:54] [ERROR] [VALIDACION] URL vacia
+[2026-06-29 17:05:58] [INFO] [PROCESO] Objetivo recibido: https://unpilar.edu.ar/campus/course/view.php?id=1157
+[2026-06-29 17:05:58] [INFO] [ESCANEO] Inicio del análisis
+[2026-06-29 17:05:58] [INFO] [ROBOT] Enviando objetivo al robot
+[2026-06-29 17:06:00] [SUCCESS] [ROBOT] Escaneo completado exitosamente
+[2026-06-29 17:06:00] [INFO] [RETORNO] Despachando JSON estructurado hacia el Frontend
