@@ -1,12 +1,13 @@
 const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
-const ejecutarExtraccion = require("./robot");
+const ejecutarExtraccion = require("./robot"); // Acoplamiento con robot.js
 const app = express();
 
 const PUERTO = 3000;
 const ARCHIVO_LOG = "registro_bunker.txt";
 
+// CONFIGURACIÓN DE ADUANA (MIDDLEWARES OBLIGATORIOS)
 app.use(cors());
 app.use(express.json());
 
@@ -28,6 +29,8 @@ function generarTimestamp() {
 function registrarLog(tipo, modulo, mensaje) {
   const linea = `[${generarTimestamp()}] [${tipo}] [${modulo}] ${mensaje}\n`;
   console.log(linea.trim());
+
+  // Escritura asincrónica permanente en disco duro
   fs.appendFile(ARCHIVO_LOG, linea, "utf8", (error) => {
     if (error) console.error("[CRITICO] Error escribiendo log:", error.message);
   });
@@ -42,6 +45,7 @@ function esURLValida(url) {
   }
 }
 
+// RUTA PRINCIPAL DE ESCANEO
 app.post("/api/escanear", async (req, res) => {
   const urlRecibida = req.body.url;
 
@@ -65,8 +69,10 @@ app.post("/api/escanear", async (req, res) => {
 
   try {
     registrarLog("INFO", "ESCANEO", "Inicio del análisis");
+
     registrarLog("INFO", "ROBOT", "Enviando objetivo al robot");
 
+    // Llamada asincrónica real al Robot
     const datosDelRobot = await ejecutarExtraccion(urlRecibida);
 
     registrarLog("SUCCESS", "ROBOT", "Escaneo completado exitosamente");
@@ -80,6 +86,7 @@ app.post("/api/escanear", async (req, res) => {
 
     if (historial.length > 20) historial.shift();
 
+    // Guardado en historial.log requerido
     const lineaHistorial = `[${generarTimestamp()}] OBJETIVO: ${urlRecibida} | TITULO: ${datosDelRobot.identidad.titulo}\n`;
     fs.appendFile("historial.log", lineaHistorial, "utf8", () => {});
 
@@ -89,6 +96,7 @@ app.post("/api/escanear", async (req, res) => {
       "Despachando JSON estructurado hacia el Frontend",
     );
 
+    // que lea "metricas" o "metrics" sin importar qué idioma use, destrabando la pantalla.
     return res.status(200).json({
       estado: "EXITO",
       mensaje: "Sondas recuperadas. Analisis completado.",
@@ -96,14 +104,15 @@ app.post("/api/escanear", async (req, res) => {
       objetivo: urlRecibida,
       identidad: datosDelRobot.identidad,
       tecnologias: datosDelRobot.tecnologias,
-      metricas: datosDelRobot.metricas,
+      metricas: datosDelRobot.metricas, // Para tu script.js en español
+      metrics: datosDelRobot.metricas, // Copia de seguridad en inglés
       enlaces: datosDelRobot.enlaces || [],
-      imagenes: datosDelRobot.imagenes || [],
     });
   } catch (error) {
     totalErrores++;
     registrarLog("ERROR", "SISTEMA", error.message);
 
+    // Si el robot falla, devolvemos la estructura armada para que el front no lea "undefined"
     return res.status(500).json({
       estado: "ERROR",
       mensaje: "Error interno durante el analisis.",
@@ -121,16 +130,20 @@ app.post("/api/escanear", async (req, res) => {
         pesoDocumentoKb: 0,
         certSslVigente: false,
       },
+      metrics: {
+        tiempoRespuestaMs: 0,
+        pesoDocumentoKb: 0,
+        certSslVigente: false,
+      },
       enlaces: [],
-      imagenes: [],
     });
   }
 });
 
+// ENDPOINTS EXTRAS DE OBSERVABILIDAD
 app.get("/api/historial", (req, res) => {
   res.json({ totalRegistros: historial.length, historial });
 });
-
 app.get("/api/estadisticas", (req, res) => {
   res.json({
     estadoServidor: "ONLINE",
