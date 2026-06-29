@@ -6,6 +6,7 @@ const app = express();
 
 const PUERTO = 3000;
 const ARCHIVO_LOG = "registro_bunker.txt";
+const MENSAJES = require("./mensajes");
 
 // CONFIGURACIÓN DE ADUANA (MIDDLEWARES OBLIGATORIOS)
 app.use(cors());
@@ -45,6 +46,31 @@ function esURLValida(url) {
   }
 }
 
+// En caso de error retornamos una respuesta prederminada para que el frontend tenga algo que renderizar y no un mensaje de error
+function respuestaError(mensaje) {
+  return {
+    estado: "ERROR",
+    mensaje: mensaje,
+    identidad: {
+      titulo: MENSAJES.sin_contenido,
+      descripcion: MENSAJES.sin_descripcion,
+    },
+    tecnologias: {
+      servidor: MENSAJES.desconocido,
+      lenguaje: MENSAJES.desconocido,
+      frameworkFront: MENSAJES.desconocido,
+    },
+    metricas: {
+      tiempoRespuestaMs: 0,
+      pesoDocumentoKb: 0,
+      certSslVigente: false,
+    },
+    enlaces: MENSAJES.sin_enlaces,
+    imagenes: MENSAJES.sin_imagenes,
+    // El robot puede detectar imágenes a través de la etiqueta de img. Devuelve una lista con las urls. puppeteer se encarga de esto, pero no esta implementado en el mvp
+  };
+}
+
 // RUTA PRINCIPAL DE ESCANEO
 app.post("/api/escanear", async (req, res) => {
   const urlRecibida = req.body.url;
@@ -54,22 +80,17 @@ app.post("/api/escanear", async (req, res) => {
   if (!urlRecibida) {
     totalErrores++;
     registrarLog("ERROR", "VALIDACION", "URL vacia");
-    return res
-      .status(400)
-      .json({ estado: "ERROR", mensaje: "Debe ingresar una URL." });
+    return res.status(400).json(respuestaError(MENSAJES.url_vacia));
   }
 
   if (!esURLValida(urlRecibida)) {
     totalErrores++;
     registrarLog("ERROR", "VALIDACION", `URL invalida: ${urlRecibida}`);
-    return res
-      .status(400)
-      .json({ estado: "ERROR", mensaje: "La URL ingresada no es valida." });
+    return res.status(400).json(respuestaError(MENSAJES.url_invalida));
   }
 
   try {
     registrarLog("INFO", "ESCANEO", "Inicio del análisis");
-
     registrarLog("INFO", "ROBOT", "Enviando objetivo al robot");
 
     // Llamada asincrónica real al Robot
@@ -96,47 +117,31 @@ app.post("/api/escanear", async (req, res) => {
       "Despachando JSON estructurado hacia el Frontend",
     );
 
-    // que lea "metricas" o "metrics" sin importar qué idioma use, destrabando la pantalla.
     return res.status(200).json({
       estado: "EXITO",
-      mensaje: "Sondas recuperadas. Analisis completado.",
+      mensaje: MENSAJES.escaneo_exitoso,
       fechaAnalisis: generarTimestamp(),
       objetivo: urlRecibida,
-      identidad: datosDelRobot.identidad,
-      tecnologias: datosDelRobot.tecnologias,
-      metricas: datosDelRobot.metricas, // Para tu script.js en español
-      metrics: datosDelRobot.metricas, // Copia de seguridad en inglés
-      enlaces: datosDelRobot.enlaces || [],
+      identidad: {
+        titulo: datosDelRobot.identidad.titulo || MENSAJES.sin_titulo,
+        descripcion:
+          datosDelRobot.identidad.descripcion || MENSAJES.sin_descripcion,
+      },
+      tecnologias: {
+        servidor: datosDelRobot.tecnologias.servidor || MENSAJES.desconocido,
+        lenguaje: datosDelRobot.tecnologias.lenguaje || MENSAJES.desconocido,
+        frameworkFront:
+          datosDelRobot.tecnologias.frameworkFront || MENSAJES.desconocido,
+      },
+      metricas: datosDelRobot.metricas,
+      enlaces: datosDelRobot.enlaces || MENSAJES.sin_enlaces,
+      imagenes: datosDelRobot.imagenes || MENSAJES.sin_imagenes,
     });
   } catch (error) {
     totalErrores++;
     registrarLog("ERROR", "SISTEMA", error.message);
 
-    // Si el robot falla, devolvemos la estructura armada para que el front no lea "undefined"
-    return res.status(500).json({
-      estado: "ERROR",
-      mensaje: "Error interno durante el analisis.",
-      identidad: {
-        titulo: "Error de Conexión",
-        descripcion: "Objetivo inalcanzable",
-      },
-      tecnologias: {
-        servidor: "Error",
-        lenguaje: "Error",
-        frameworkFront: "Error",
-      },
-      metricas: {
-        tiempoRespuestaMs: 0,
-        pesoDocumentoKb: 0,
-        certSslVigente: false,
-      },
-      metrics: {
-        tiempoRespuestaMs: 0,
-        pesoDocumentoKb: 0,
-        certSslVigente: false,
-      },
-      enlaces: [],
-    });
+    return res.status(500).json(respuestaError(MENSAJES.error_reintento));
   }
 });
 
@@ -144,6 +149,7 @@ app.post("/api/escanear", async (req, res) => {
 app.get("/api/historial", (req, res) => {
   res.json({ totalRegistros: historial.length, historial });
 });
+
 app.get("/api/estadisticas", (req, res) => {
   res.json({
     estadoServidor: "ONLINE",
