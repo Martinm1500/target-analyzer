@@ -1,13 +1,12 @@
 const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
-const ejecutarExtraccion = require("./robot"); // Acoplamiento con robot.js
+const ejecutarExtraccion = require("./robot");
 const app = express();
 
 const PUERTO = 3000;
 const ARCHIVO_LOG = "registro_bunker.txt";
 
-// CONFIGURACIÓN DE ADUANA (MIDDLEWARES OBLIGATORIOS)
 app.use(cors());
 app.use(express.json());
 
@@ -29,8 +28,6 @@ function generarTimestamp() {
 function registrarLog(tipo, modulo, mensaje) {
   const linea = `[${generarTimestamp()}] [${tipo}] [${modulo}] ${mensaje}\n`;
   console.log(linea.trim());
-
-  // Escritura asincrónica permanente en disco duro
   fs.appendFile(ARCHIVO_LOG, linea, "utf8", (error) => {
     if (error) console.error("[CRITICO] Error escribiendo log:", error.message);
   });
@@ -45,7 +42,6 @@ function esURLValida(url) {
   }
 }
 
-// RUTA PRINCIPAL DE ESCANEO
 app.post("/api/escanear", async (req, res) => {
   const urlRecibida = req.body.url;
 
@@ -69,10 +65,8 @@ app.post("/api/escanear", async (req, res) => {
 
   try {
     registrarLog("INFO", "ESCANEO", "Inicio del análisis");
-
     registrarLog("INFO", "ROBOT", "Enviando objetivo al robot");
 
-    // Llamada asincrónica real al Robot
     const datosDelRobot = await ejecutarExtraccion(urlRecibida);
 
     registrarLog("SUCCESS", "ROBOT", "Escaneo completado exitosamente");
@@ -86,7 +80,6 @@ app.post("/api/escanear", async (req, res) => {
 
     if (historial.length > 20) historial.shift();
 
-    // Guardado en historial.log requerido
     const lineaHistorial = `[${generarTimestamp()}] OBJETIVO: ${urlRecibida} | TITULO: ${datosDelRobot.identidad.titulo}\n`;
     fs.appendFile("historial.log", lineaHistorial, "utf8", () => {});
 
@@ -105,6 +98,7 @@ app.post("/api/escanear", async (req, res) => {
       tecnologias: datosDelRobot.tecnologias,
       metricas: datosDelRobot.metricas,
       enlaces: datosDelRobot.enlaces || [],
+      imagenes: datosDelRobot.imagenes || [],
     });
   } catch (error) {
     totalErrores++;
@@ -127,20 +121,16 @@ app.post("/api/escanear", async (req, res) => {
         pesoDocumentoKb: 0,
         certSslVigente: false,
       },
-      metrics: {
-        tiempoRespuestaMs: 0,
-        pesoDocumentoKb: 0,
-        certSslVigente: false,
-      },
       enlaces: [],
+      imagenes: [],
     });
   }
 });
 
-// ENDPOINTS EXTRAS DE OBSERVABILIDAD
 app.get("/api/historial", (req, res) => {
   res.json({ totalRegistros: historial.length, historial });
 });
+
 app.get("/api/estadisticas", (req, res) => {
   res.json({
     estadoServidor: "ONLINE",
