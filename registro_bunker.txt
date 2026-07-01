@@ -45,3 +45,16 @@
 [2026-06-29 17:05:58] [INFO] [ROBOT] Enviando objetivo al robot
 [2026-06-29 17:06:00] [SUCCESS] [ROBOT] Escaneo completado exitosamente
 [2026-06-29 17:06:00] [INFO] [RETORNO] Despachando JSON estructurado hacia el Frontend
+[2026-07-01 03:47:40] [INFO] [SISTEMA] Servidor inicializado correctamente
+[2026-07-01 03:47:40] [INFO] [SISTEMA] Escuchando en puerto 3000
+[2026-07-01 03:50:46] [INFO] [SISTEMA] Servidor inicializado correctamente
+[2026-07-01 03:50:46] [INFO] [SISTEMA] Escuchando en puerto 3000
+[2026-07-01 03:51:42] [INFO] [SISTEMA] Servidor inicializado correctamente
+[2026-07-01 03:51:42] [INFO] [SISTEMA] Escuchando en puerto 3000
+[2026-07-01 03:51:47] [INFO] [PROCESO] Objetivo recibido: https://unpilar.edu.ar/campus/course/view.php?id=1157
+[2026-07-01 03:51:47] [INFO] [ESCANEO] Inicio del análisis
+[2026-07-01 03:51:47] [INFO] [ROBOT] Enviando objetivo al robot
+[2026-07-01 03:52:00] [SUCCESS] [ROBOT] Escaneo completado exitosamente
+[2026-07-01 03:52:00] [INFO] [RETORNO] Despachando JSON estructurado hacia el Frontend
+[2026-07-01 03:53:22] [INFO] [PROCESO] Objetivo recibido: 
+[2026-07-01 03:53:22] [URL_VACIA] [VALIDACION] URL vacia o tipo invalido

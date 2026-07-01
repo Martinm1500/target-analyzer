@@ -8,7 +8,7 @@ const PUERTO = 3000;
 const ARCHIVO_LOG = "registro_bunker.txt";
 const TIMEOUT_LIMITE = 15000;
 
-// MENSAJES ESTÁTICOS DEL SISTEMA
+// MENSAJES
 const MSG_URL_VACIA = "Debe ingresar una URL";
 const MSG_URL_INVALIDA = "URL inválida";
 const MSG_ESCANEO_EXITOSO = "Sondas recuperadas. Análisis completado.";
@@ -25,11 +25,14 @@ const MSG_INALCANZABLE = "Objetivo inalcanzable";
 const ESTADO_EXITO = "EXITO";
 const ESTADO_ERROR = "ERROR";
 
-// CÓDIGOS ESPECÍFICOS
+// CÓDIGO INTERNO
+const ERR_INTERNO_TIMEOUT = "TIMEOUT_ROBOT";
+
+// CÓDIGOS PÚBLICOS
 const COD_ESCANEO_OK = "ESCANEO_OK";
 const COD_URL_VACIA = "URL_VACIA";
 const COD_URL_INVALIDA = "URL_INVALIDA";
-const COD_TIMEOUT_ROBOT = "TIMEOUT_ROBOT";
+const COD_TIMEOUT = "TIMEOUT";
 const COD_ERROR_SISTEMA = "ERROR_SISTEMA";
 
 // CONFIGURACIÓN DE ADUANA (MIDDLEWARES OBLIGATORIOS)
@@ -55,7 +58,6 @@ function registrarLog(tipo, modulo, mensaje) {
   const linea = `[${generarTimestamp()}] [${tipo}] [${modulo}] ${mensaje}\n`;
   console.log(linea.trim());
 
-  // Escritura asincrónica permanente en disco duro
   fs.appendFile(ARCHIVO_LOG, linea, "utf8", (error) => {
     if (error) console.error("[CRITICO] Error escribiendo log:", error.message);
   });
@@ -64,7 +66,7 @@ function registrarLog(tipo, modulo, mensaje) {
 async function lanzarSondaConTimeout(url) {
   return new Promise((resolve, reject) => {
     const timer = setTimeout(
-      () => reject(new Error(COD_TIMEOUT_ROBOT)),
+      () => reject(new Error(ERR_INTERNO_TIMEOUT)),
       TIMEOUT_LIMITE,
     );
 
@@ -82,7 +84,7 @@ async function lanzarSondaConTimeout(url) {
 
 function esURLValida(url) {
   if (!url.startsWith("https://") && !url.startsWith("http://"))
-    url = "https://" + urlIngresada;
+    url = "https://" + url;
   try {
     new URL(url);
     return true;
@@ -121,9 +123,9 @@ app.post("/api/escanear", async (req, res) => {
 
   registrarLog("INFO", "PROCESO", `Objetivo recibido: ${urlRecibida}`);
 
-  if (!urlRecibida) {
+  if (!urlRecibida || typeof urlRecibida !== "string") {
     totalErrores++;
-    registrarLog(COD_URL_VACIA, "VALIDACION", "URL vacia");
+    registrarLog(COD_URL_VACIA, "VALIDACION", "URL vacia o tipo invalido");
     return res.status(400).json(respuestaError(COD_URL_VACIA, MSG_URL_VACIA));
   }
 
@@ -151,12 +153,12 @@ app.post("/api/escanear", async (req, res) => {
     historial.push({
       fecha: generarTimestamp(),
       url: urlRecibida,
-      titulo: datosDelRobot.identidad.titulo,
+      titulo: datosDelRobot?.identidad?.titulo || MSG_SIN_TITULO,
     });
 
     if (historial.length > 20) historial.shift();
 
-    const lineaHistorial = `[${generarTimestamp()}] OBJETIVO: ${urlRecibida} | TITULO: ${datosDelRobot.identidad.titulo}\n`;
+    const lineaHistorial = `[${generarTimestamp()}] OBJETIVO: ${urlRecibida} | TITULO: ${datosDelRobot?.identidad?.titulo || MSG_SIN_TITULO}\n`;
     fs.appendFile("historial.log", lineaHistorial, "utf8", () => {});
 
     registrarLog(
@@ -172,26 +174,29 @@ app.post("/api/escanear", async (req, res) => {
       fechaAnalisis: generarTimestamp(),
       objetivo: urlRecibida,
       identidad: {
-        titulo: datosDelRobot.identidad.titulo || MSG_SIN_TITULO,
-        descripcion: datosDelRobot.identidad.descripcion || MSG_SIN_DESCRIPCION,
+        titulo: datosDelRobot?.identidad?.titulo || MSG_SIN_TITULO,
+        descripcion:
+          datosDelRobot?.identidad?.descripcion || MSG_SIN_DESCRIPCION,
       },
       tecnologias: {
-        servidor: datosDelRobot.tecnologias.servidor || MSG_DESCONOCIDO,
-        lenguaje: datosDelRobot.tecnologias.lenguaje || MSG_DESCONOCIDO,
+        servidor: datosDelRobot?.tecnologias?.servidor || MSG_DESCONOCIDO,
+        lenguaje: datosDelRobot?.tecnologias?.lenguaje || MSG_DESCONOCIDO,
         frameworkFront:
-          datosDelRobot.tecnologias.frameworkFront || MSG_DESCONOCIDO,
+          datosDelRobot?.tecnologias?.frameworkFront || MSG_DESCONOCIDO,
       },
-      metricas: datosDelRobot.metricas,
-      enlaces: datosDelRobot.enlaces || MSG_SIN_ENLACES,
-      imagenes: datosDelRobot.imagenes || MSG_SIN_IMAGENES,
+      metricas: datosDelRobot?.metricas || {
+        tiempoRespuestaMs: 0,
+        pesoDocumentoKb: 0,
+        certSslVigente: false,
+      },
+      enlaces: datosDelRobot?.enlaces || MSG_SIN_ENLACES,
+      imagenes: datosDelRobot?.imagenes || MSG_SIN_IMAGENES,
     });
   } catch (error) {
     totalErrores++;
 
     const codigoError =
-      error.message === COD_TIMEOUT_ROBOT
-        ? COD_TIMEOUT_ROBOT
-        : COD_ERROR_SISTEMA;
+      error.message === ERR_INTERNO_TIMEOUT ? COD_TIMEOUT : COD_ERROR_SISTEMA;
 
     registrarLog("ERROR", "SISTEMA", error.message);
 
