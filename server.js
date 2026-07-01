@@ -1,12 +1,36 @@
 const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
-const ejecutarExtraccion = require("./robot"); // Acoplamiento con robot.js
+const ejecutarExtraccion = require("./robot");
 const app = express();
 
 const PUERTO = 3000;
 const ARCHIVO_LOG = "registro_bunker.txt";
-const MENSAJES = require("./mensajes");
+const TIMEOUT_LIMITE = 15000;
+
+// MENSAJES ESTÁTICOS DEL SISTEMA
+const MSG_URL_VACIA = "Debe ingresar una URL";
+const MSG_URL_INVALIDA = "URL inválida";
+const MSG_ESCANEO_EXITOSO = "Sondas recuperadas. Análisis completado.";
+const MSG_ERROR_REINTENTO = "Volver a intentar";
+const MSG_SIN_TITULO = "No hay título para mostrar";
+const MSG_SIN_DESCRIPCION = "Sin descripción";
+const MSG_SIN_CONTENIDO = "No hay contenido para mostrar";
+const MSG_SIN_ENLACES = "No hay enlaces que mostrar";
+const MSG_SIN_IMAGENES = "No hay imágenes que mostrar";
+const MSG_DESCONOCIDO = "Desconocido";
+const MSG_INALCANZABLE = "Objetivo inalcanzable";
+
+// ESTADOS GENERALES DE RESPUESTA
+const ESTADO_EXITO = "EXITO";
+const ESTADO_ERROR = "ERROR";
+
+// CÓDIGOS ESPECÍFICOS
+const COD_ESCANEO_OK = "ESCANEO_OK";
+const COD_URL_VACIA = "URL_VACIA";
+const COD_URL_INVALIDA = "URL_INVALIDA";
+const COD_TIMEOUT_ROBOT = "TIMEOUT_ROBOT";
+const COD_ERROR_SISTEMA = "ERROR_SISTEMA";
 
 // CONFIGURACIÓN DE ADUANA (MIDDLEWARES OBLIGATORIOS)
 app.use(cors());
@@ -37,7 +61,28 @@ function registrarLog(tipo, modulo, mensaje) {
   });
 }
 
+async function lanzarSondaConTimeout(url) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(
+      () => reject(new Error(COD_TIMEOUT_ROBOT)),
+      TIMEOUT_LIMITE,
+    );
+
+    ejecutarExtraccion(url)
+      .then((data) => {
+        clearTimeout(timer);
+        resolve(data);
+      })
+      .catch((err) => {
+        clearTimeout(timer);
+        reject(err);
+      });
+  });
+}
+
 function esURLValida(url) {
+  if (!url.startsWith("https://") && !url.startsWith("http://"))
+    url = "https://" + urlIngresada;
   try {
     new URL(url);
     return true;
@@ -46,28 +91,27 @@ function esURLValida(url) {
   }
 }
 
-// En caso de error retornamos una respuesta prederminada para que el frontend tenga algo que renderizar y no un mensaje de error
-function respuestaError(mensaje) {
+function respuestaError(codigo, mensaje) {
   return {
-    estado: "ERROR",
+    estado: ESTADO_ERROR,
+    codigo: codigo,
     mensaje: mensaje,
     identidad: {
-      titulo: MENSAJES.sin_contenido,
-      descripcion: MENSAJES.sin_descripcion,
+      titulo: MSG_SIN_CONTENIDO,
+      descripcion: MSG_SIN_DESCRIPCION,
     },
     tecnologias: {
-      servidor: MENSAJES.desconocido,
-      lenguaje: MENSAJES.desconocido,
-      frameworkFront: MENSAJES.desconocido,
+      servidor: MSG_DESCONOCIDO,
+      lenguaje: MSG_DESCONOCIDO,
+      frameworkFront: MSG_DESCONOCIDO,
     },
     metricas: {
       tiempoRespuestaMs: 0,
       pesoDocumentoKb: 0,
       certSslVigente: false,
     },
-    enlaces: MENSAJES.sin_enlaces,
-    imagenes: MENSAJES.sin_imagenes,
-    // El robot puede detectar imágenes a través de la etiqueta de img. Devuelve una lista con las urls. puppeteer se encarga de esto, pero no esta implementado en el mvp
+    enlaces: MSG_SIN_ENLACES,
+    imagenes: MSG_SIN_IMAGENES,
   };
 }
 
@@ -79,22 +123,27 @@ app.post("/api/escanear", async (req, res) => {
 
   if (!urlRecibida) {
     totalErrores++;
-    registrarLog("ERROR", "VALIDACION", "URL vacia");
-    return res.status(400).json(respuestaError(MENSAJES.url_vacia));
+    registrarLog(COD_URL_VACIA, "VALIDACION", "URL vacia");
+    return res.status(400).json(respuestaError(COD_URL_VACIA, MSG_URL_VACIA));
   }
 
   if (!esURLValida(urlRecibida)) {
     totalErrores++;
-    registrarLog("ERROR", "VALIDACION", `URL invalida: ${urlRecibida}`);
-    return res.status(400).json(respuestaError(MENSAJES.url_invalida));
+    registrarLog(
+      COD_URL_INVALIDA,
+      "VALIDACION",
+      `URL invalida: ${urlRecibida}`,
+    );
+    return res
+      .status(400)
+      .json(respuestaError(COD_URL_INVALIDA, MSG_URL_INVALIDA));
   }
 
   try {
     registrarLog("INFO", "ESCANEO", "Inicio del análisis");
     registrarLog("INFO", "ROBOT", "Enviando objetivo al robot");
 
-    // Llamada asincrónica real al Robot
-    const datosDelRobot = await ejecutarExtraccion(urlRecibida);
+    const datosDelRobot = await lanzarSondaConTimeout(urlRecibida);
 
     registrarLog("SUCCESS", "ROBOT", "Escaneo completado exitosamente");
 
@@ -107,7 +156,6 @@ app.post("/api/escanear", async (req, res) => {
 
     if (historial.length > 20) historial.shift();
 
-    // Guardado en historial.log requerido
     const lineaHistorial = `[${generarTimestamp()}] OBJETIVO: ${urlRecibida} | TITULO: ${datosDelRobot.identidad.titulo}\n`;
     fs.appendFile("historial.log", lineaHistorial, "utf8", () => {});
 
@@ -118,34 +166,41 @@ app.post("/api/escanear", async (req, res) => {
     );
 
     return res.status(200).json({
-      estado: "EXITO",
-      mensaje: MENSAJES.escaneo_exitoso,
+      estado: ESTADO_EXITO,
+      codigo: COD_ESCANEO_OK,
+      mensaje: MSG_ESCANEO_EXITOSO,
       fechaAnalisis: generarTimestamp(),
       objetivo: urlRecibida,
       identidad: {
-        titulo: datosDelRobot.identidad.titulo || MENSAJES.sin_titulo,
-        descripcion:
-          datosDelRobot.identidad.descripcion || MENSAJES.sin_descripcion,
+        titulo: datosDelRobot.identidad.titulo || MSG_SIN_TITULO,
+        descripcion: datosDelRobot.identidad.descripcion || MSG_SIN_DESCRIPCION,
       },
       tecnologias: {
-        servidor: datosDelRobot.tecnologias.servidor || MENSAJES.desconocido,
-        lenguaje: datosDelRobot.tecnologias.lenguaje || MENSAJES.desconocido,
+        servidor: datosDelRobot.tecnologias.servidor || MSG_DESCONOCIDO,
+        lenguaje: datosDelRobot.tecnologias.lenguaje || MSG_DESCONOCIDO,
         frameworkFront:
-          datosDelRobot.tecnologias.frameworkFront || MENSAJES.desconocido,
+          datosDelRobot.tecnologias.frameworkFront || MSG_DESCONOCIDO,
       },
       metricas: datosDelRobot.metricas,
-      enlaces: datosDelRobot.enlaces || MENSAJES.sin_enlaces,
-      imagenes: datosDelRobot.imagenes || MENSAJES.sin_imagenes,
+      enlaces: datosDelRobot.enlaces || MSG_SIN_ENLACES,
+      imagenes: datosDelRobot.imagenes || MSG_SIN_IMAGENES,
     });
   } catch (error) {
     totalErrores++;
+
+    const codigoError =
+      error.message === COD_TIMEOUT_ROBOT
+        ? COD_TIMEOUT_ROBOT
+        : COD_ERROR_SISTEMA;
+
     registrarLog("ERROR", "SISTEMA", error.message);
 
-    return res.status(500).json(respuestaError(MENSAJES.error_reintento));
+    return res
+      .status(500)
+      .json(respuestaError(codigoError, MSG_ERROR_REINTENTO));
   }
 });
 
-// ENDPOINTS EXTRAS DE OBSERVABILIDAD
 app.get("/api/historial", (req, res) => {
   res.json({ totalRegistros: historial.length, historial });
 });
